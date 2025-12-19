@@ -13,10 +13,6 @@
       />
 
   <include file="permissions.zcml" />
-  <include
-      file="lawgiver.zcml"
-      zcml:condition="installed ftw.lawgiver"
-      />
 
   <i18n:registerTranslations directory="locales" />
 
