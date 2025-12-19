@@ -41,8 +41,9 @@ setup(name='ftw.tokenauth',
       url='https://github.com/4teamwork/ftw.tokenauth',
       license='GPL2',
 
-      packages=find_packages(exclude=['ez_setup']),
+      packages=find_packages("src", exclude=['ez_setup']),
       namespace_packages=['ftw'],
+      package_dir={'': 'src'},
       include_package_data=True,
       zip_safe=False,
 
