@@ -1,0 +1,15 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:browser="http://namespaces.zope.org/browser"
+    xmlns:i18n="http://namespaces.zope.org/i18n"
+    i18n_domain="collective.ftw.tokenauth"
+    >
+
+  <browser:page
+      name="oauth2-token"
+      for="Products.CMFPlone.interfaces.IPloneSiteRoot"
+      class=".oauth2_token.OAuth2TokenEndpoint"
+      permission="zope.Public"
+      />
+
+</configure>

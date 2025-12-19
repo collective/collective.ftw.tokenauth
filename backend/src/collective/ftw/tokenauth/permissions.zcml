@@ -1,0 +1,15 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    i18n_domain="plone.restapi"
+    >
+
+  <permission
+      id="collective.ftw.tokenauth.ImpersonateUser"
+      title="collective.ftw.tokenauth: Impersonate user"
+      />
+  <permission
+      id="collective.ftw.tokenauth.ManageOwnServiceKeys"
+      title="collective.ftw.tokenauth: Manage own Service Keys"
+      />
+
+</configure>

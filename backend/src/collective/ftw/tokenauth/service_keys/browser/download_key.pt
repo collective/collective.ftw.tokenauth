@@ -1,0 +1,84 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:i18n="http://xml.zope.org/namespaces/i18n"
+      xmlns:metal="http://xml.zope.org/namespaces/metal"
+      xmlns:tal="http://xml.zope.org/namespaces/tal"
+      metal:use-macro="context/main_template/macros/master"
+      i18n:domain="collective.ftw.tokenauth"
+>
+
+  <metal:head metal:fill-slot="head_slot">
+    <style>
+    #plone-document-byline {
+        display: none;
+    }
+
+    pre.json-keyfile {
+        white-space: pre-wrap;       /* Since CSS 2.1 */
+        white-space: -moz-pre-wrap;  /* Mozilla, since 1999 */
+        white-space: -pre-wrap;      /* Opera 4-6 */
+        white-space: -o-pre-wrap;    /* Opera 7 */
+        word-wrap: break-word;       /* Internet Explorer 5.5+ */
+        border: 2px solid grey;
+        padding: 5px;
+        background: #EEE;
+    }
+    </style>
+  </metal:head>
+
+  <metal:block fill-slot="top_slot"
+               tal:define="
+                 dummy python:request.set('disable_border',1);
+               "
+  />
+
+  <metal:title fill-slot="content-title">
+    <h1 class="documentFirstHeading">
+      <span class="fa fa-lock"></span>
+      <span i18n:translate="">Download Service Key</span>
+    </h1>
+  </metal:title>
+
+  <metal:content fill-slot="content-core">
+    <p i18n:translate="">
+        Download your service key.
+    </p>
+    <p i18n:translate="">
+        This is the
+      <strong>only time</strong>
+       your private key will be displayed - it will not
+        be stored on the server, and can't be recovered should you fail to save it.
+    </p>
+
+    <p i18n:translate="">
+        You should copy &amp; paste this key into a
+      <tt>.json</tt>
+       file, and
+        store this file in a location accessible
+      <strong>only to your service application</strong>.
+
+        This key grants anyone in possession of it full access to this account.
+        You should therefore make sure to protect it with the least file system
+        permissions possible.
+    </p>
+
+    <h2 tal:content="options/title">Key Title</h2>
+
+    <pre class="json-keyfile"
+         tal:content="options/json_keyfile"
+    >JSON Keyfile</pre>
+
+    <br />
+    <a class="button"
+       tal:attributes="
+         href string:${context/absolute_url}/@@manage-service-keys;
+       "
+    >
+      &lt;
+      <span i18n:translate="">Back</span>
+    </a>
+
+  </metal:content>
+
+
+
+</html>
