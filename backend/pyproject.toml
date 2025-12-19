@@ -41,7 +41,6 @@ dependencies = [
     'Zope2',
     # Other dependencies
     'cryptography',
-    'ftw.upgrade',
     'ipaddress',
     'PyJWT',
 ]
