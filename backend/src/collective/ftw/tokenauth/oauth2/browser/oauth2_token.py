@@ -202,7 +202,7 @@ class OAuth2TokenEndpoint(BrowserView):
 
         if requested_grant_type != JWT_BEARER_GRANT_TYPE:
             raise InvalidRequest(
-                "Only grant type %r is supported" % JWT_BEARER_GRANT_TYPE
+                f"Only grant type {JWT_BEARER_GRANT_TYPE} is supported"
             )
 
     def require_assertion(self):
@@ -250,7 +250,7 @@ class OAuth2TokenEndpoint(BrowserView):
         try:
             return processor.verify(assertion, service_key)
         except (VerificationError, InvalidTokenError) as exc:
-            raise InvalidGrant(str(exc))
+            raise InvalidGrant(str(exc)) from exc
 
     def verified_subject(self, claimset, service_key):
         """Verify the claim's subject and return it.

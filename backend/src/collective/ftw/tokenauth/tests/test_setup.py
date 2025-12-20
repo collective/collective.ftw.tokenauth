@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Setup tests for this package."""
 
 from collective.ftw.tokenauth.testing import FTW_TOKENAUTH_INTEGRATION_TESTING

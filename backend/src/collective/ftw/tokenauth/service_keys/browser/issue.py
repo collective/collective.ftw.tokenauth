@@ -77,4 +77,4 @@ class IssueKeyForm(BaseForm):
             }
             return self.download_key_template(**template_vars)
 
-        return super(IssueKeyForm, self).render()
+        return super().render()

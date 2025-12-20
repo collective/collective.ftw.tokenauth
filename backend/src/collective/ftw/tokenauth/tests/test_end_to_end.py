@@ -1,5 +1,5 @@
 from bs4 import BeautifulSoup
-from collective.ftw.tokenauth.tests import FunctionalZServerTestCase
+from collective.ftw.tokenauth.tests import FunctionalTestCase
 from plone.app.testing import TEST_USER_ID
 from plone.app.testing import TEST_USER_NAME
 from plone.app.testing import TEST_USER_PASSWORD
@@ -14,7 +14,7 @@ import time
 GRANT_TYPE = "urn:ietf:params:oauth:grant-type:jwt-bearer"
 
 
-class TestEndToEndAuthenticationFlow(FunctionalZServerTestCase):
+class TestEndToEndAuthenticationFlow(FunctionalTestCase):
     def test_end_to_end_happy_path(self):
         browser = Browser()
         browser.handleErrors = False
@@ -56,17 +56,17 @@ class TestEndToEndAuthenticationFlow(FunctionalZServerTestCase):
         # Step 3 - Exchange the JWT grant for an access token by making
         # a token request to the OAuth2 token endpoint
         payload = {"grant_type": GRANT_TYPE, "assertion": grant_token}
-        token_response = requests.post(token_uri, data=payload)
+        token_response = requests.post(token_uri, data=payload, timeout=5)
         token = token_response.json()["access_token"]
 
         # Step 4 - Use the access token to make authenticated requests
         headers = {"Authorization": f"Bearer {token}"}
-        response = requests.get(self.portal.absolute_url(), headers=headers)
+        response = requests.get(self.portal.absolute_url(), headers=headers, timeout=5)
         self.assertIn(TEST_USER_ID, response.text)
 
         # Test with plone.restapi as well
         headers = {"Authorization": f"Bearer {token}", "Accept": "application/json"}
 
-        response = requests.get(self.portal.absolute_url(), headers=headers)
+        response = requests.get(self.portal.absolute_url(), headers=headers, timeout=5)
         self.assertIn("title", response.json())
         self.assertEqual(response.json()["title"], "Plone site")

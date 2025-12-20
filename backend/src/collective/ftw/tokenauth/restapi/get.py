@@ -1,7 +1,5 @@
-from collective.ftw.tokenauth import _
 from collective.ftw.tokenauth.pas.storage import CredentialStorage
 from plone import api
-from plone.restapi.deserializer import json_body
 from plone.restapi.services import Service
 
 import datetime

@@ -1,4 +1,4 @@
-from collective.ftw.tokenauth.tests import FunctionalZServerTestCase
+from collective.ftw.tokenauth.tests import FunctionalTestCase
 from plone import api
 from plone.restapi.testing import RelativeSession
 
@@ -6,13 +6,12 @@ import transaction
 
 
 TEST_USER_ID = "test"
-TEST_USER_PASSWORD = "secret"
+TEST_USER_PASSWORD = "secret"  # noqa: S105
 
 
-class TestRestApi(FunctionalZServerTestCase):
+class TestRestApi(FunctionalTestCase):
     def setUp(self):
-        super(TestRestApi, self).setUp()
-
+        self.portal = self.layer["portal"]
         uf = api.portal.get_tool("acl_users")
         uf.source_users.addUser(TEST_USER_ID, TEST_USER_ID, TEST_USER_PASSWORD)
         uf.portal_role_manager.doAssignRoleToPrincipal(TEST_USER_ID, "Member")
@@ -95,7 +94,7 @@ class TestRestApi(FunctionalZServerTestCase):
         self.assertEqual(204, response.status_code)
 
     def test_delete_inexistent_service_key(self):
-        response = self.api_session.delete(f"/@service-keys/inexistent-service-key-id")
+        response = self.api_session.delete("/@service-keys/inexistent-service-key-id")
         self.assertEqual(400, response.status_code)
 
     def test_delete_service_key_is_really_deleted(self):

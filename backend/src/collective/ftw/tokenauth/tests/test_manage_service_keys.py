@@ -7,7 +7,6 @@ from collective.ftw.tokenauth.tests.utils import build_access_token
 from collective.ftw.tokenauth.tests.utils import build_service_key
 from datetime import datetime
 from freezegun import freeze_time
-from plone import api
 from plone.app.testing import TEST_USER_ID
 from plone.app.testing import TEST_USER_NAME
 from plone.app.testing import TEST_USER_PASSWORD
@@ -435,7 +434,7 @@ class TestEditServiceKeysView(FunctionalTestCase):
         )
         transaction.commit()
 
-        edit_url = f"{self.portal_url}/@@manage-service-keys-edit?key_id={service_key['key_id']}"
+        edit_url = f"{self.portal_url}/@@manage-service-keys-edit?key_id={service_key['key_id']}"  # noqa: E501
         self._login()
         self.browser.open(edit_url)
 

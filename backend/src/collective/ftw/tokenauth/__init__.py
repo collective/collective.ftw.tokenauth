@@ -1,8 +1,6 @@
 from AccessControl.Permissions import add_user_folders
 from collective.ftw.tokenauth.pas import plugin
-from Products.PluggableAuthService.PluggableAuthService import (
-    registerMultiPlugin,  # noqa
-)
+from Products.PluggableAuthService.PluggableAuthService import registerMultiPlugin
 from zope.i18nmessageid import MessageFactory
 
 

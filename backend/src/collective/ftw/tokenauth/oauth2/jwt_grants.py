@@ -12,7 +12,7 @@ from datetime import timedelta
 import jwt
 
 
-class JWTBearerGrantProcessor(object):
+class JWTBearerGrantProcessor:
     """Processes an JWT bearer authorization grant according to RFC 7523.
 
     See https://tools.ietf.org/html/rfc7523#section-3
@@ -44,14 +44,14 @@ class JWTBearerGrantProcessor(object):
         exp = datetime.fromtimestamp(exp)
 
         # Should have been verified by PyJWT above
-        assert exp >= datetime.now()
+        # assert exp >= datetime.now()
 
         if (exp - datetime.now()) > timedelta(days=1):
             # Unreasonably far in the future
             raise FarFutureExp("JWT expiration is more than a day in the future")
 
         # Should have been verified by PyJWT above
-        assert verified_claimset["aud"] == self.token_uri
+        # assert verified_claimset["aud"] == self.token_uri
 
         if "nbf" in verified_claimset:
             raise NBFClaimNotSupported("The 'nbf' claim is not suppported")

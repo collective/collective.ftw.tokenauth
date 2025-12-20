@@ -20,7 +20,7 @@ class EditKeyForm(BaseForm):
     fields = Fields(IKeyMetadataSchema)
 
     def updateWidgets(self, *args, **kwargs):
-        super(EditKeyForm, self).updateWidgets(*args, **kwargs)
+        super().updateWidgets(*args, **kwargs)
 
         saving = "form.buttons.save" in self.request
 
@@ -47,7 +47,7 @@ class EditKeyForm(BaseForm):
 
     def action(self):
         """Redefine <form action=''> attribute."""
-        return self.request.getURL() + "?key_id=%s" % self.request["key_id"]
+        return f"{self.request.getURL()}?key_id={self.request['key_id']}"
 
     def field_value_has_changed(self, field, new_value, key):
         name = field.getName()

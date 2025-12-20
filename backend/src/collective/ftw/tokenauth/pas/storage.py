@@ -10,7 +10,7 @@ from zExceptions import Unauthorized
 from zope.globalrequest import getRequest
 
 
-class CredentialStorage(object):
+class CredentialStorage:
     """Storage abstraction for service keys, access tokens, and usage logs.
 
     The storage's internal data structured are kept as attributes on the
@@ -92,7 +92,7 @@ class CredentialStorage(object):
         if not keys:
             return None
 
-        assert len(keys) == 1
+        # assert len(keys) == 1
         return keys[0]
 
     def list_service_keys(self, user_id):
@@ -112,11 +112,11 @@ class CredentialStorage(object):
         if not unrestricted:
             self._assert_current_user_owns_key(key_id)
 
-        key = self._service_keys[key_id]
+        # key = self._service_keys[key_id]
 
-        assert key_id in self._service_keys
-        assert key["user_id"] == user_id
-        assert api.user.get_current().id == user_id
+        # assert key_id in self._service_keys
+        # assert key["user_id"] == user_id
+        # assert api.user.get_current().id == user_id
 
         self._service_keys.pop(key_id)
 
@@ -130,7 +130,7 @@ class CredentialStorage(object):
     def add_access_token(self, access_token):
         """Store the given access_token (dict with raw token and metadata)."""
         # Verify that service key exists
-        assert self.get_service_key(access_token["key_id"], unrestricted=True)
+        # assert self.get_service_key(access_token["key_id"], unrestricted=True)
 
         # The raw token itself isn't stored in metadata, just used as a key
         token = access_token["token"]

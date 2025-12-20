@@ -2,17 +2,13 @@ from plone.app.contenttypes.testing import PLONE_APP_CONTENTTYPES_FIXTURE
 from plone.app.testing import applyProfile
 from plone.app.testing import FunctionalTesting
 from plone.app.testing import IntegrationTesting
-from plone.app.testing import PLONE_FIXTURE
 from plone.app.testing import PloneSandboxLayer
-from plone.testing import Layer
-from plone.testing import z2
 from plone.testing.zope import WSGI_SERVER_FIXTURE
-from zope.configuration import xmlconfig
 
 import collective.ftw.tokenauth
 
 
-DEFAULT_TESTING_TOKEN_URI = "http://nohost/plone/@@oauth2-token"
+DEFAULT_TESTING_TOKEN_URI = "http://nohost/plone/@@oauth2-token"  # noqa: S105
 
 
 class FtwTokenAuthLayer(PloneSandboxLayer):

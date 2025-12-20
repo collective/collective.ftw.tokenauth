@@ -1,13 +1,14 @@
 from collective.ftw.tokenauth.pas.storage import CredentialStorage
 from collective.ftw.tokenauth.service_keys.key_generation import create_service_key_pair
-from collective.ftw.tokenauth.testing.layers import DEFAULT_TESTING_TOKEN_URI
 from plone.app.testing import TEST_USER_ID
 
 import jwt
 import time
 
 
-def build_key_pair(arguments={}):
+def build_key_pair(arguments=None):
+    if arguments is None:
+        arguments = {}
     private_key, service_key = create_service_key_pair(
         arguments.get("user_id", TEST_USER_ID),
         arguments.get("title"),
@@ -20,8 +21,13 @@ def build_key_pair(arguments={}):
     return private_key, service_key
 
 
-def build_jwt_grant(keypair, arguments={}, without_claims=[]):
+def build_jwt_grant(keypair, arguments=None, without_claims=None):
     """build a JWT grant for tests"""
+    if arguments is None:
+        arguments = {}
+    if without_claims is None:
+        without_claims = []
+
     private_key, service_key = keypair
 
     # Determine defaults for required claims
@@ -62,17 +68,22 @@ def build_jwt_grant(keypair, arguments={}, without_claims=[]):
     return grant_token
 
 
-def build_service_key(plugin, arguments={}):
-    private_key, service_key = plugin.issue_keypair(
+def build_service_key(plugin, arguments=None):
+    if arguments is None:
+        arguments = {}
+    key_pair = plugin.issue_keypair(
         arguments.get("user_id", TEST_USER_ID),
         arguments.get("title", "Default Title"),
         arguments.get("ip_range"),
     )
 
-    return service_key
+    return key_pair[1]
 
 
-def build_access_token(plugin, service_key=None, arguments={}):
+def build_access_token(plugin, service_key=None, arguments=None):
+    if arguments is None:
+        arguments = {}
+
     if service_key is None:
         service_key = build_service_key(
             plugin,

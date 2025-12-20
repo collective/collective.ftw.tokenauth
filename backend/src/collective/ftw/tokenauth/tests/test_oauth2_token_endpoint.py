@@ -1,7 +1,7 @@
 # from ftw.builder import Builder
 # from ftw.builder import create
 from collective.ftw.tokenauth.oauth2.browser.oauth2_token import JWT_BEARER_GRANT_TYPE
-from collective.ftw.tokenauth.tests import FunctionalZServerTestCase
+from collective.ftw.tokenauth.tests import FunctionalTestCase
 from collective.ftw.tokenauth.tests.utils import build_jwt_grant
 from collective.ftw.tokenauth.tests.utils import build_key_pair
 from plone import api
@@ -14,9 +14,8 @@ import requests
 import transaction
 
 
-class TestOAuth2TokenEndpoint(FunctionalZServerTestCase):
+class TestOAuth2TokenEndpoint(FunctionalTestCase):
     def setUp(self):
-        # super(TestOAuth2TokenEndpoint, self).setUp()
         super().setUp()
         self.keypair = self.plugin.issue_keypair(TEST_USER_ID, "My Service Key")
         # self.valid_assertion = create(Builder("jwt_grant").from_keypair(self.keypair))
@@ -26,7 +25,7 @@ class TestOAuth2TokenEndpoint(FunctionalZServerTestCase):
         self.token_url = self.portal.absolute_url() + "/@@oauth2-token"
 
     def test_only_accepts_post(self):
-        response = requests.get(self.token_url)
+        response = requests.get(self.token_url, timeout=5)
         self.assertEqual(405, response.status_code)
 
         self.assertEqual(
@@ -36,7 +35,7 @@ class TestOAuth2TokenEndpoint(FunctionalZServerTestCase):
 
     def test_sets_cache_headers(self):
         data = {"grant_type": JWT_BEARER_GRANT_TYPE, "assertion": self.valid_assertion}
-        response = requests.post(self.token_url, data=data)
+        response = requests.post(self.token_url, data=data, timeout=5)
         self.assertIn("Pragma", response.headers)
         self.assertEqual("no-cache", response.headers["Pragma"])
         self.assertIn("Cache-Control", response.headers)
@@ -44,13 +43,13 @@ class TestOAuth2TokenEndpoint(FunctionalZServerTestCase):
 
     def test_sets_content_type_header(self):
         data = {"grant_type": JWT_BEARER_GRANT_TYPE, "assertion": self.valid_assertion}
-        response = requests.post(self.token_url, data=data)
+        response = requests.post(self.token_url, data=data, timeout=5)
         self.assertIn("Content-Type", response.headers)
         self.assertEqual("application/json", response.headers["Content-Type"])
 
     def test_rejects_missing_grant_types(self):
         data = {"assertion": self.valid_assertion}
-        response = requests.post(self.token_url, data=data)
+        response = requests.post(self.token_url, data=data, timeout=5)
         self.assertEqual(400, response.status_code)
 
         self.assertEqual(
@@ -60,21 +59,20 @@ class TestOAuth2TokenEndpoint(FunctionalZServerTestCase):
 
     def test_rejects_unknown_grant_types(self):
         data = {"grant_type": "unknown", "assertion": self.valid_assertion}
-        response = requests.post(self.token_url, data=data)
+        response = requests.post(self.token_url, data=data, timeout=5)
         self.assertEqual(400, response.status_code)
 
         self.assertEqual(
             {
                 "error": "invalid_request",
-                "error_description": "Only grant type '%s' is supported"
-                % JWT_BEARER_GRANT_TYPE,
+                "error_description": f"Only grant type '{JWT_BEARER_GRANT_TYPE}' is supported",  # noqa: E501
             },
             response.json(),
         )
 
     def test_rejects_missing_assertion(self):
         data = {"grant_type": JWT_BEARER_GRANT_TYPE}
-        response = requests.post(self.token_url, data=data)
+        response = requests.post(self.token_url, data=data, timeout=5)
         self.assertEqual(400, response.status_code)
 
         self.assertEqual(
@@ -87,7 +85,7 @@ class TestOAuth2TokenEndpoint(FunctionalZServerTestCase):
         assertion = jwt.encode({}, "some-key", algorithm="HS256")
 
         data = {"grant_type": JWT_BEARER_GRANT_TYPE, "assertion": assertion}
-        response = requests.post(self.token_url, data=data)
+        response = requests.post(self.token_url, data=data, timeout=5)
         self.assertEqual(400, response.status_code)
 
         self.assertEqual(
@@ -104,7 +102,7 @@ class TestOAuth2TokenEndpoint(FunctionalZServerTestCase):
         # assertion = create(Builder("jwt_grant").from_keypair(not_stored_keypair))
         assertion = build_jwt_grant(not_stored_keypair)
         data = {"grant_type": JWT_BEARER_GRANT_TYPE, "assertion": assertion}
-        response = requests.post(self.token_url, data=data)
+        response = requests.post(self.token_url, data=data, timeout=5)
         self.assertEqual(400, response.status_code)
 
         self.assertEqual(
@@ -125,7 +123,7 @@ class TestOAuth2TokenEndpoint(FunctionalZServerTestCase):
         )
 
         data = {"grant_type": JWT_BEARER_GRANT_TYPE, "assertion": invalid_assertion}
-        response = requests.post(self.token_url, data=data)
+        response = requests.post(self.token_url, data=data, timeout=5)
         self.assertEqual(400, response.status_code)
 
         self.assertEqual(
@@ -135,7 +133,7 @@ class TestOAuth2TokenEndpoint(FunctionalZServerTestCase):
 
     def test_issues_access_token_for_valid_grant(self):
         data = {"grant_type": JWT_BEARER_GRANT_TYPE, "assertion": self.valid_assertion}
-        response = requests.post(self.token_url, data=data)
+        response = requests.post(self.token_url, data=data, timeout=5)
         transaction.commit()
 
         self.assertEqual(200, response.status_code)
@@ -160,7 +158,7 @@ class TestOAuth2TokenEndpoint(FunctionalZServerTestCase):
         transaction.commit()
 
         data = {"grant_type": JWT_BEARER_GRANT_TYPE, "assertion": self.valid_assertion}
-        response = requests.post(self.token_url, data=data)
+        response = requests.post(self.token_url, data=data, timeout=5)
         self.assertEqual(200, response.status_code)
         self.assertEqual(7200, response.json()["expires_in"])
 
@@ -176,7 +174,7 @@ class TestOAuth2TokenEndpoint(FunctionalZServerTestCase):
         transaction.commit()
 
         data = {"grant_type": JWT_BEARER_GRANT_TYPE, "assertion": assertion}
-        response = requests.post(self.token_url, data=data)
+        response = requests.post(self.token_url, data=data, timeout=5)
         transaction.commit()
 
         self.assertEqual(200, response.status_code)
@@ -201,13 +199,13 @@ class TestOAuth2TokenEndpoint(FunctionalZServerTestCase):
         transaction.commit()
 
         data = {"grant_type": JWT_BEARER_GRANT_TYPE, "assertion": assertion}
-        response = requests.post(self.token_url, data=data)
+        response = requests.post(self.token_url, data=data, timeout=5)
         self.assertEqual(400, response.status_code)
 
         self.assertEqual(
             {
                 "error": "invalid_grant",
-                "error_description": "JWT subject doesn't match user_id of service key.",
+                "error_description": "JWT subject doesn't match user_id of service key.",  # noqa: E501
             },
             response.json(),
         )
@@ -221,7 +219,7 @@ class TestOAuth2TokenEndpoint(FunctionalZServerTestCase):
         transaction.commit()
 
         data = {"grant_type": JWT_BEARER_GRANT_TYPE, "assertion": assertion}
-        response = requests.post(self.token_url, data=data)
+        response = requests.post(self.token_url, data=data, timeout=5)
         self.assertEqual(400, response.status_code)
 
         self.assertEqual(

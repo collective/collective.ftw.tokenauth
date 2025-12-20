@@ -1,8 +1,6 @@
 from collective.ftw.tokenauth.tests import FunctionalTestCase
 from plone import api
-from Products.PluggableAuthService.interfaces.plugins import (
-    IAuthenticationPlugin,
-)  # noqa
+from Products.PluggableAuthService.interfaces.plugins import IAuthenticationPlugin
 from Products.PluggableAuthService.interfaces.plugins import IExtractionPlugin
 
 
@@ -28,7 +26,7 @@ class TestDefaultProfile(FunctionalTestCase):
         ]
 
         self.assertEqual(
-            set([IExtractionPlugin, IAuthenticationPlugin]), set(activated_interfaces)
+            [IExtractionPlugin, IAuthenticationPlugin], activated_interfaces
         )
 
     def test_pas_plugin_not_installed_in_zope_acl_users(self):

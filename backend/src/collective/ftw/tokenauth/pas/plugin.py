@@ -10,9 +10,7 @@ from plone import api
 from Products.CMFCore.permissions import ManagePortal
 from Products.CMFCore.utils import getToolByName
 from Products.PageTemplates.PageTemplateFile import PageTemplateFile
-from Products.PluggableAuthService.interfaces.plugins import (
-    IAuthenticationPlugin,
-)  # noqa
+from Products.PluggableAuthService.interfaces.plugins import IAuthenticationPlugin
 from Products.PluggableAuthService.interfaces.plugins import IExtractionPlugin
 from Products.PluggableAuthService.plugins.BasePlugin import BasePlugin
 from zope.component.hooks import getSite
@@ -51,9 +49,7 @@ def addTokenAuthenticationPlugin(
 
     if REQUEST is not None:
         REQUEST["RESPONSE"].redirect(
-            "%s/manage_workspace"
-            "?manage_tabs_message=token+authentication+plugin+added."
-            % self.absolute_url()
+            f"{self.absolute_url}/manage_workspace?manage_tabs_message=token+authentication+plugin+added."
         )
 
 
@@ -71,7 +67,8 @@ class TokenAuthenticationPlugin(BasePlugin):
     # ZMI tab for configuration page
     manage_options = (
         {"label": "Configuration", "action": "manage_config"},
-    ) + BasePlugin.manage_options
+        BasePlugin.manage_options,
+    )
     security.declareProtected(ManagePortal, "manage_config")
     manage_config = PageTemplateFile("www/config", globals(), __name__="manage_config")
 
@@ -135,10 +132,7 @@ class TokenAuthenticationPlugin(BasePlugin):
         expires_in = access_token["expires_in"]
         expires = issued + timedelta(seconds=expires_in)
 
-        if expires < datetime.now():
-            return True
-
-        return False
+        return expires < datetime.now()
 
     def _create_access_token(self):
         """Produce a raw access token (opaque string).
@@ -188,7 +182,7 @@ class TokenAuthenticationPlugin(BasePlugin):
 
     security.declarePrivate("authenticateCredentials")
 
-    def authenticateCredentials(self, credentials):
+    def authenticateCredentials(self, credentials):  # noqa: C901
         """Authenticate a request that contains an OAuth2 bearer access token.
 
         Implementation of IAuthenticationPlugin that authenticates requests
@@ -251,7 +245,7 @@ class TokenAuthenticationPlugin(BasePlugin):
                 return None
 
             if not permitted_ip(client_ip, ip_range):
-                log.warning("Authentication attempt from disallowed IP %s" % client_ip)
+                log.warning("Authentication attempt from disallowed IP %s", client_ip)
                 return None
 
         # Fetch and verify the user associated with the stored access token
@@ -295,6 +289,5 @@ class TokenAuthenticationPlugin(BasePlugin):
         )
 
         response.redirect(
-            "%s/manage_config?manage_tabs_message=%s"
-            % (self.absolute_url(), "Configuration+updated.")
+            f"{self.absolute_url()}/manage_config?manage_tabs_message=Configuration+updated"
         )

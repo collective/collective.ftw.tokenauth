@@ -7,7 +7,7 @@ import hashlib
 import os
 
 
-class KeyGenerator(object):
+class KeyGenerator:
     """Create an RSA key pair (public/private keys)."""
 
     def generate_rsa_key_pair(self):
@@ -26,7 +26,7 @@ class KeyGenerator(object):
             serialization.Encoding.PEM, serialization.PublicFormat.SubjectPublicKeyInfo
         )
 
-        fingerprint = hashlib.sha1(public_pem).hexdigest()
+        fingerprint = hashlib.sha256(public_pem).hexdigest()
 
         pair = {}
         pair["public_key"] = public_pem.decode()

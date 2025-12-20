@@ -18,7 +18,7 @@ def valid_ip_range(value):
                 "Invalid IP range: ${ip_range_error}",
                 mapping={"ip_range_error": str(exc)},
             )
-        )
+        ) from exc
     return True
 
 
@@ -50,7 +50,7 @@ class IKeyMetadataSchema(model.Schema):
         constraint=valid_ip_range,
         description=_(
             "Allowed IP range specification in "
-            '<strong><a href="https://en.wikipedia.org/wiki/Classless_Inter-Domain_Routing#CIDR_notation">'  # noqa
+            '<strong><a href="https://en.wikipedia.org/wiki/Classless_Inter-Domain_Routing#CIDR_notation">'
             "CIDR notation</a></strong>. "
             "Multiple comma-separated addresses / networks may be supplied."
         ),
@@ -74,4 +74,4 @@ class BaseForm(Form):
 
     def update(self):
         self.request.set("disable_border", True)
-        super(BaseForm, self).update()
+        super().update()

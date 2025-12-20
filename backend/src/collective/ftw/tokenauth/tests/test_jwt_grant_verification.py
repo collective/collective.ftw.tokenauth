@@ -1,5 +1,4 @@
 from collective.ftw.tokenauth.oauth2.exceptions import FarFutureExp
-from collective.ftw.tokenauth.oauth2.exceptions import IatInFuture
 from collective.ftw.tokenauth.oauth2.exceptions import IatTooFarInPast
 from collective.ftw.tokenauth.oauth2.exceptions import IssuerMismatch
 from collective.ftw.tokenauth.oauth2.exceptions import MissingExpClaim
@@ -7,13 +6,12 @@ from collective.ftw.tokenauth.oauth2.exceptions import MissingIatClaim
 from collective.ftw.tokenauth.oauth2.exceptions import NBFClaimNotSupported
 from collective.ftw.tokenauth.oauth2.exceptions import ScopesNotSupported
 from collective.ftw.tokenauth.oauth2.jwt_grants import JWTBearerGrantProcessor
+from collective.ftw.tokenauth.testing import DEFAULT_TESTING_TOKEN_URI
 from collective.ftw.tokenauth.testing import FTW_TOKENAUTH_INTEGRATION_TESTING
-from collective.ftw.tokenauth.testing.layers import DEFAULT_TESTING_TOKEN_URI
 from collective.ftw.tokenauth.tests.utils import build_jwt_grant
 from collective.ftw.tokenauth.tests.utils import build_key_pair
 from jwt.exceptions import ExpiredSignatureError
 from jwt.exceptions import InvalidAudienceError
-from plone.app.testing import TEST_USER_ID
 
 import time
 import unittest
