@@ -25,9 +25,9 @@ path = "frontend"
 
 [frontend.package]
 name = "@plone-collective/volto-tokenauth"
-path = "frontend/packages/@plone-collective/volto-tokenauth"
-changelog = "frontend/packages/@plone-collective/volto-tokenauth/CHANGELOG.md"
-towncrier_settings = "frontend/packages/@plone-collective/volto-tokenauth/towncrier.toml"
+path = "frontend/packages/volto-tokenauth"
+changelog = "frontend/packages/volto-tokenauth/CHANGELOG.md"
+towncrier_settings = "frontend/packages/volto-tokenauth/towncrier.toml"
 base_package = "@plone/volto"
 publish = false
 
