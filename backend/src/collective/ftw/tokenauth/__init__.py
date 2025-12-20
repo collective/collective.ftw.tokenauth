@@ -7,7 +7,7 @@ from zope.i18nmessageid import MessageFactory
 _ = MessageFactory("collective.ftw.tokenauth")
 
 
-__version__ = "2.0.0a0"
+__version__ = "1.0.0a0"
 
 PACKAGE_NAME = "collective.ftw.tokenauth"
 
