@@ -44,9 +44,10 @@ class CreateToken(Service):
         )
 
         service_key_json = json.loads(create_json_keyfile(private_key, service_key))
-        service_key_json.update(
-            {"title": data.get("title"), "ip_range": data.get("ip_range")}
-        )
+        service_key_json.update({
+            "title": data.get("title"),
+            "ip_range": data.get("ip_range"),
+        })
 
         result = {
             "@id": service_key_id,

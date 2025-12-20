@@ -12,18 +12,17 @@ from zope.globalrequest import getRequest
 
 
 class EditKeyForm(BaseForm):
+    label = _("Edit Service Key")
 
-    label = _(u'Edit Service Key')
-
-    successMessage = Z3CFormMF('Data successfully updated.')
-    noChangesMessage = Z3CFormMF('No changes were applied.')
+    successMessage = Z3CFormMF("Data successfully updated.")
+    noChangesMessage = Z3CFormMF("No changes were applied.")
 
     fields = Fields(IKeyMetadataSchema)
 
     def updateWidgets(self, *args, **kwargs):
         super(EditKeyForm, self).updateWidgets(*args, **kwargs)
 
-        saving = 'form.buttons.save' in self.request
+        saving = "form.buttons.save" in self.request
 
         # Prefill form widgets with persisted values from DB
         key = self.get_key()
@@ -41,15 +40,14 @@ class EditKeyForm(BaseForm):
                 widget.value = converter.toWidgetValue(value)
 
     def get_key(self):
-        key_id = self.request.form['key_id']
+        key_id = self.request.form["key_id"]
         storage = CredentialStorage(self.get_plugin())
         key = storage.get_service_key(key_id)
         return key
 
     def action(self):
-        """Redefine <form action=''> attribute.
-        """
-        return self.request.getURL() + '?key_id=%s' % self.request['key_id']
+        """Redefine <form action=''> attribute."""
+        return self.request.getURL() + "?key_id=%s" % self.request["key_id"]
 
     def field_value_has_changed(self, field, new_value, key):
         name = field.getName()
@@ -81,7 +79,7 @@ class EditKeyForm(BaseForm):
 
         return changes
 
-    @button.buttonAndHandler(_(u'Save'), name='save')
+    @button.buttonAndHandler(_("Save"), name="save")
     def handleApply(self, action):
         data, errors = self.extractData()
         if errors:
@@ -94,7 +92,7 @@ class EditKeyForm(BaseForm):
             api.portal.show_message(self.noChangesMessage, getRequest())
         return self.request.RESPONSE.redirect(self.main_url)
 
-    @button.buttonAndHandler(_(u'Cancel'), name='cancel')
+    @button.buttonAndHandler(_("Cancel"), name="cancel")
     def handleCancel(self, action):
-        api.portal.show_message(_('Edit cancelled'), getRequest())
+        api.portal.show_message(_("Edit cancelled"), getRequest())
         return self.request.RESPONSE.redirect(self.main_url)

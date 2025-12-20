@@ -9,16 +9,16 @@ from jwt.exceptions import InvalidTokenError
 from plone import api
 from Products.CMFCore.utils import getToolByName
 from Products.Five.browser import BrowserView
+
 import json
 import jwt
 
 
-JWT_BEARER_GRANT_TYPE = 'urn:ietf:params:oauth:grant-type:jwt-bearer'
+JWT_BEARER_GRANT_TYPE = "urn:ietf:params:oauth:grant-type:jwt-bearer"
 
 
 class ErrorResponse(Exception):
-    """Base class for error responses according to RFC 6749.
-    """
+    """Base class for error responses according to RFC 6749."""
 
     def __init__(self, msg, status=None):
         self.msg = msg
@@ -26,17 +26,15 @@ class ErrorResponse(Exception):
 
 
 class InvalidRequest(ErrorResponse):
-    """Error response for invalid token requests (e.g. missing parameter).
-    """
+    """Error response for invalid token requests (e.g. missing parameter)."""
 
-    error_type = 'invalid_request'
+    error_type = "invalid_request"
 
 
 class InvalidGrant(ErrorResponse):
-    """Error response for invalid grants (JWT not valid or expired).
-    """
+    """Error response for invalid grants (JWT not valid or expired)."""
 
-    error_type = 'invalid_grant'
+    error_type = "invalid_grant"
 
 
 class OAuth2TokenEndpoint(BrowserView):
@@ -187,31 +185,29 @@ class OAuth2TokenEndpoint(BrowserView):
         return self.issue_access_token(service_key, user_id)
 
     def only_allow_post(self):
-        """Reject any requests that aren't POST.
-        """
+        """Reject any requests that aren't POST."""
         # Clients MUST use POST, see
         # https://tools.ietf.org/html/rfc6749#section-3.2)
-        if self.request.get('REQUEST_METHOD', 'GET').upper() != 'POST':
-            raise InvalidRequest('POST only', status=405)
+        if self.request.get("REQUEST_METHOD", "GET").upper() != "POST":
+            raise InvalidRequest("POST only", status=405)
 
     def require_correct_grant_type(self):
-        """Verify presence and appropriate kind of grant_type.
-        """
+        """Verify presence and appropriate kind of grant_type."""
         # We only support the JWT Bearer grant type as defined in
         # https://tools.ietf.org/html/rfc7523#section-2.1
-        requested_grant_type = self.request.form.get('grant_type')
+        requested_grant_type = self.request.form.get("grant_type")
 
         if requested_grant_type is None:
             raise InvalidRequest("Missing 'grant_type'")
 
         if requested_grant_type != JWT_BEARER_GRANT_TYPE:
             raise InvalidRequest(
-                'Only grant type %r is supported' % JWT_BEARER_GRANT_TYPE)
+                "Only grant type %r is supported" % JWT_BEARER_GRANT_TYPE
+            )
 
     def require_assertion(self):
-        """Verify presence of an assertion and return it.
-        """
-        assertion = self.request.form.get('assertion')
+        """Verify presence of an assertion and return it."""
+        assertion = self.request.form.get("assertion")
         if not assertion:
             raise InvalidRequest("Missing 'assertion'")
 
@@ -228,18 +224,17 @@ class OAuth2TokenEndpoint(BrowserView):
         actually verify the JWT's signature.
         """
         unverified_header = jwt.get_unverified_header(assertion)
-        if unverified_header.get('alg') != u'RS256':
+        if unverified_header.get("alg") != "RS256":
             raise InvalidRequest("Only RS256 signature algorithm is supported")
+        unverified_claimset = jwt.decode(assertion, options={"verify_signature": False})
 
-        unverified_claimset = jwt.decode(assertion, verify=False)
-
-        client_id = unverified_claimset['iss']  # Issuer / Client-ID
+        client_id = unverified_claimset["iss"]  # Issuer / Client-ID
 
         storage = CredentialStorage(self.plugin)
         service_key = storage.get_service_key_for_client_id(client_id)
 
         if service_key is None:
-            raise InvalidGrant('No associated key found')
+            raise InvalidGrant("No associated key found")
 
         return service_key
 
@@ -263,23 +258,25 @@ class OAuth2TokenEndpoint(BrowserView):
         If the subject does not match the userid of the service_key, the
         'Impersonate user' permission is required.
         """
-        subject = claimset['sub']
-        actor = service_key['user_id']
+        subject = claimset["sub"]
+        actor = service_key["user_id"]
         if subject != actor:
             # Check if actor is allowed to impersonate
-            uf = getToolByName(self.context, 'acl_users')
+            uf = getToolByName(self.context, "acl_users")
             user = uf.getUserById(actor)
             if not user:
-                raise(InvalidGrant('Service key user not found.'))
+                raise (InvalidGrant("Service key user not found."))
             user = user.__of__(uf)
 
             old_security_manager = getSecurityManager()
             newSecurityManager(self.request, user)
             try:
                 if not getSecurityManager().checkPermission(
-                        ImpersonateUser, self.context):
+                    ImpersonateUser, self.context
+                ):
                     raise InvalidGrant(
-                        "JWT subject doesn't match user_id of service key.")
+                        "JWT subject doesn't match user_id of service key."
+                    )
             finally:
                 setSecurityManager(old_security_manager)
 
@@ -296,40 +293,37 @@ class OAuth2TokenEndpoint(BrowserView):
         # Token type is 'Bearer', as defined in RFC 6750
         # https://tools.ietf.org/html/rfc6750
 
-        key_id = service_key['key_id']
+        key_id = service_key["key_id"]
         access_token = self.plugin.issue_access_token(key_id, user_id)
         token_data = {
-            "access_token": access_token['token'],
-            "expires_in": access_token['expires_in'],  # default: 3600
+            "access_token": access_token["token"],
+            "expires_in": access_token["expires_in"],  # default: 3600
             "token_type": "Bearer",
         }
         return self.send_response(token_data)
 
     def send_error_response(self, exc):
-        """Return error response for invalid grants or requests.
-        """
+        """Return error response for invalid grants or requests."""
         # Response format according to
         # https://tools.ietf.org/html/rfc6749#section-5.2
         # https://tools.ietf.org/html/rfc7523#section-3.1
 
         status = 400 if exc.status is None else exc.status
         self.request.response.setStatus(status)
-        error = {'error': exc.error_type,
-                 'error_description': exc.msg}
+        error = {"error": exc.error_type, "error_description": exc.msg}
         return self.send_response(error)
 
     def send_response(self, response_data):
-        """Return a JSON response with appropriate headers.
-        """
-        self.request.response.setHeader('Content-Type', 'application/json')
+        """Return a JSON response with appropriate headers."""
+        self.request.response.setHeader("Content-Type", "application/json")
 
         # Set caching headers according to
         # https://tools.ietf.org/html/rfc6749#section-5.1
-        self.request.response.setHeader('Cache-Control', 'no-store')
-        self.request.response.setHeader('Pragma', 'no-cache')
+        self.request.response.setHeader("Cache-Control", "no-store")
+        self.request.response.setHeader("Pragma", "no-cache")
         return json.dumps(response_data)
 
     @property
     def plugin(self):
         acl_users = api.portal.get().acl_users
-        return acl_users['token_auth']
+        return acl_users["token_auth"]

@@ -14,6 +14,6 @@ class TestSetupUninstall:
 
     def test_browserlayer_not_registered(self, browser_layers):
         """Test that IBrowserLayer is not registered."""
-        from collective.ftw.tokenauth.interfaces import IBrowserLayer
+        from collective.ftw.tokenauth.interfaces import ICollectiveFTWTokenauthLayer
 
-        assert IBrowserLayer not in browser_layers
+        assert ICollectiveFTWTokenauthLayer not in browser_layers

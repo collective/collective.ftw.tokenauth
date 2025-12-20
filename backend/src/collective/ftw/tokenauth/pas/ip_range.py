@@ -1,10 +1,10 @@
 from ipaddress import ip_address
 from ipaddress import ip_network
+from plone.base.utils import safe_text
 
 
 class InvalidIPRangeSpecification(ValueError):
-    """Error in specification of allowed IP range.
-    """
+    """Error in specification of allowed IP range."""
 
 
 def parse_ip_range(ip_range):
@@ -21,20 +21,19 @@ def parse_ip_range(ip_range):
     192.168.0.0/16
     192.168.1.1, 10.0.0.0/8
     """
-    ranges = [rng.strip() for rng in to_unicode(ip_range).split(u',')]
+    ranges = [rng.strip() for rng in to_unicode(ip_range).split(",")]
     networks = []
     for rng in ranges:
         try:
             network = ip_network(rng)
         except ValueError as exc:
-            raise InvalidIPRangeSpecification(exc.message)
+            raise InvalidIPRangeSpecification(str(exc)) from exc
         networks.append(network)
     return networks
 
 
 def permitted_ip(client_ip, ip_range):
-    """Return True if a client IP is in the given range(s), False otherwise.
-    """
+    """Return True if a client IP is in the given range(s), False otherwise."""
     try:
         allowed_networks = parse_ip_range(ip_range)
     except InvalidIPRangeSpecification:
@@ -52,6 +51,4 @@ def to_unicode(ip_spec):
     sure the ip_spec is unicode, decoding it as ASCII if necessary (IP specs
     should never contain any non-ASCII characters).
     """
-    if not isinstance(ip_spec, unicode):
-        ip_spec = ip_spec.decode('ascii')
-    return ip_spec
+    return safe_text(ip_spec)

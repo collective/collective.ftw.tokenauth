@@ -131,6 +131,7 @@ i18n: $(VENV_FOLDER) ## Update locales
 .PHONY: test
 test: $(VENV_FOLDER) ## run tests
 	@$(BIN_FOLDER)/pytest
+	@if [ -d "src/collective/ftw/tokenauth/tests" ]; then $(BIN_FOLDER)/pytest src/collective/ftw/tokenauth/tests; fi
 
 .PHONY: test-coverage
 test-coverage: $(VENV_FOLDER) ## run tests with coverage

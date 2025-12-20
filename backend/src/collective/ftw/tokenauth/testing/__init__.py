@@ -1,8 +1,6 @@
-from collective.ftw.tokenauth.testing.layers import FTW_TOKENAUTH_FUNCTIONAL_TESTING  # noqa
-from collective.ftw.tokenauth.testing.layers import FTW_TOKENAUTH_FUNCTIONAL_ZSERVER_TESTING  # noqa
-
-from collective.ftw.tokenauth.testing.builders import AccessTokenBuilder  # noqa
-from collective.ftw.tokenauth.testing.builders import JWTGrantBuilder  # noqa
-from collective.ftw.tokenauth.testing.builders import KeyPairBuilder  # noqa
-from collective.ftw.tokenauth.testing.builders import ServiceKeyBuilder  # noqa
-from collective.ftw.tokenauth.testing.layers import FTW_TOKENAUTH_UNIT_TESTING  # noqa
+from collective.ftw.tokenauth.testing.layers import (
+    FTW_TOKENAUTH_FUNCTIONAL_TESTING,
+)  # noqa
+from collective.ftw.tokenauth.testing.layers import (
+    FTW_TOKENAUTH_INTEGRATION_TESTING,
+)  # noqa

@@ -1,70 +1,48 @@
-from ftw.builder.testing import BUILDER_LAYER
-from ftw.testbrowser import REQUESTS_BROWSER_FIXTURE
+from plone.app.contenttypes.testing import PLONE_APP_CONTENTTYPES_FIXTURE
 from plone.app.testing import applyProfile
 from plone.app.testing import FunctionalTesting
+from plone.app.testing import IntegrationTesting
 from plone.app.testing import PLONE_FIXTURE
 from plone.app.testing import PloneSandboxLayer
 from plone.testing import Layer
 from plone.testing import z2
+from plone.testing.zope import WSGI_SERVER_FIXTURE
 from zope.configuration import xmlconfig
 
+import collective.ftw.tokenauth
 
-DEFAULT_TESTING_TOKEN_URI = 'http://nohost/plone/@@oauth2-token'
+
+DEFAULT_TESTING_TOKEN_URI = "http://nohost/plone/@@oauth2-token"
 
 
 class FtwTokenAuthLayer(PloneSandboxLayer):
-
-    defaultBases = (PLONE_FIXTURE, BUILDER_LAYER)
+    defaultBases = (PLONE_APP_CONTENTTYPES_FIXTURE,)
 
     def setUpZope(self, app, configurationContext):
         # Load ZCML
         import plone.restapi
-        xmlconfig.file(
-            'configure.zcml',
-            plone.restapi,
-            context=configurationContext
-        )
-        xmlconfig.file(
-            'meta.zcml',
-            plone.restapi,
-            context=configurationContext
-        )
-        z2.installProduct(app, 'plone.restapi')
 
-        import collective.ftw.tokenauth
-        xmlconfig.file(
-            'configure.zcml',
-            collective.ftw.tokenauth,
-            context=configurationContext
-        )
-        z2.installProduct(app, 'collective.ftw.tokenauth')
+        self.loadZCML(package=plone.restapi)
+        self.loadZCML(package=collective.ftw.tokenauth)
 
     def setUpPloneSite(self, portal):
-        applyProfile(portal, 'collective.ftw.tokenauth:default')
+        applyProfile(portal, "collective.ftw.tokenauth:default")
         uf = portal.acl_users
-        self['plugin'] = uf['token_auth']
+        self["plugin"] = uf["token_auth"]
 
-        applyProfile(portal, 'plone.restapi:default')
+        applyProfile(portal, "plone.restapi:default")
 
 
 FTW_TOKENAUTH_FIXTURE = FtwTokenAuthLayer()
+
+FTW_TOKENAUTH_INTEGRATION_TESTING = IntegrationTesting(
+    bases=(FTW_TOKENAUTH_FIXTURE,), name="FtwtokenauthLayer:IntegrationTesting"
+)
+
 FTW_TOKENAUTH_FUNCTIONAL_TESTING = FunctionalTesting(
-    bases=(FTW_TOKENAUTH_FIXTURE,),
-    name="FtwtokenauthLayer:Functional"
+    bases=(
+        FTW_TOKENAUTH_FIXTURE,
+        WSGI_SERVER_FIXTURE,
+    ),
+    name="FtwtokenauthLayer:FunctionalTestingr",
 )
-
-FTW_TOKENAUTH_FUNCTIONAL_ZSERVER_TESTING = FunctionalTesting(
-    bases=(FTW_TOKENAUTH_FIXTURE,
-           z2.ZSERVER_FIXTURE,
-           REQUESTS_BROWSER_FIXTURE),
-    name="FtwtokenauthLayer:FunctionalZServer"
-)
-
-
-class UnitTesting(Layer):
-    """Layer for using ftw.builder in unit tests.
-    """
-
-    defaultBases = (BUILDER_LAYER, )
-
-FTW_TOKENAUTH_UNIT_TESTING = UnitTesting()

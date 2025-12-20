@@ -1,6 +1,5 @@
-from collective.ftw.tokenauth.testing import ACCEPTANCE_TESTING
-from collective.ftw.tokenauth.testing import FUNCTIONAL_TESTING
-from collective.ftw.tokenauth.testing import INTEGRATION_TESTING
+from collective.ftw.tokenauth.testing import FTW_TOKENAUTH_FUNCTIONAL_TESTING
+from collective.ftw.tokenauth.testing import FTW_TOKENAUTH_INTEGRATION_TESTING
 from pytest_plone import fixtures_factory
 
 
@@ -9,8 +8,7 @@ pytest_plugins = ["pytest_plone"]
 
 globals().update(
     fixtures_factory((
-        (ACCEPTANCE_TESTING, "acceptance"),
-        (FUNCTIONAL_TESTING, "functional"),
-        (INTEGRATION_TESTING, "integration"),
+        (FTW_TOKENAUTH_FUNCTIONAL_TESTING, "functional"),
+        (FTW_TOKENAUTH_INTEGRATION_TESTING, "integration"),
     ))
 )

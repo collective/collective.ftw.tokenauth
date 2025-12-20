@@ -1,6 +1,7 @@
 from collective.ftw.tokenauth.tests import FunctionalZServerTestCase
 from plone import api
 from plone.restapi.testing import RelativeSession
+
 import transaction
 
 

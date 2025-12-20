@@ -7,7 +7,7 @@
 
   <browser:page
       name="oauth2-token"
-      for="Products.CMFPlone.interfaces.IPloneSiteRoot"
+      for="plone.base.interfaces.IPloneSiteRoot"
       class=".oauth2_token.OAuth2TokenEndpoint"
       permission="zope.Public"
       />

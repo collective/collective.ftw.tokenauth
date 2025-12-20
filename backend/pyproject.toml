@@ -53,6 +53,10 @@ test = [
     "pytest",
     "pytest-cov",
     "pytest-plone>=0.5.0",
+    "freezegun",
+    "zope.testbrowser",
+    "beautifulsoup4",
+    "requests",
 ]
 
 [project.urls]

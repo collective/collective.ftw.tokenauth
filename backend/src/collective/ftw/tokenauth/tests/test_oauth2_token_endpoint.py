@@ -1,254 +1,233 @@
-from ftw.builder import Builder
-from ftw.builder import create
-from ftw.testbrowser import browsing
+# from ftw.builder import Builder
+# from ftw.builder import create
 from collective.ftw.tokenauth.oauth2.browser.oauth2_token import JWT_BEARER_GRANT_TYPE
-from collective.ftw.tokenauth.tests import FunctionalTestCase
+from collective.ftw.tokenauth.tests import FunctionalZServerTestCase
+from collective.ftw.tokenauth.tests.utils import build_jwt_grant
+from collective.ftw.tokenauth.tests.utils import build_key_pair
 from plone import api
 from plone.app.testing import SITE_OWNER_NAME
 from plone.app.testing import TEST_USER_ID
 from plone.app.testing import TEST_USER_NAME
+
 import jwt
+import requests
 import transaction
 
 
-class TestOAuth2TokenEndpoint(FunctionalTestCase):
-
+class TestOAuth2TokenEndpoint(FunctionalZServerTestCase):
     def setUp(self):
-        super(TestOAuth2TokenEndpoint, self).setUp()
-        self.keypair = self.plugin.issue_keypair(
-            TEST_USER_ID,
-            'My Service Key')
-
-        self.valid_assertion = create(
-            Builder('jwt_grant').from_keypair(self.keypair))
+        # super(TestOAuth2TokenEndpoint, self).setUp()
+        super().setUp()
+        self.keypair = self.plugin.issue_keypair(TEST_USER_ID, "My Service Key")
+        # self.valid_assertion = create(Builder("jwt_grant").from_keypair(self.keypair))
+        self.valid_assertion = build_jwt_grant(self.keypair)
 
         transaction.commit()
+        self.token_url = self.portal.absolute_url() + "/@@oauth2-token"
 
-    @browsing
-    def test_only_accepts_post(self, browser):
-        with browser.expect_http_error(code=405):
-            browser.login().open(view='@@oauth2-token')
-
-        self.assertEqual(
-            {'error': 'invalid_request',
-             'error_description': 'POST only'},
-            browser.json)
-
-    @browsing
-    def test_sets_cache_headers(self, browser):
-        data = {'grant_type': JWT_BEARER_GRANT_TYPE,
-                'assertion': self.valid_assertion}
-
-        browser.open(view='@@oauth2-token', method='POST', data=data)
-
-        self.assertDictContainsSubset(
-            {'Pragma': 'no-cache',
-             'Cache-Control': 'no-store'},
-            browser.headers)
-
-    @browsing
-    def test_sets_content_type_header(self, browser):
-        data = {'grant_type': JWT_BEARER_GRANT_TYPE,
-                'assertion': self.valid_assertion}
-
-        browser.open(view='@@oauth2-token', method='POST', data=data)
-
-        self.assertDictContainsSubset(
-            {'Content-Type': 'application/json'},
-            browser.headers)
-
-    @browsing
-    def test_rejects_missing_grant_types(self, browser):
-        data = {'assertion': self.valid_assertion}
-
-        with browser.expect_http_error(code=400):
-            browser.open(view='@@oauth2-token', method='POST', data=data)
+    def test_only_accepts_post(self):
+        response = requests.get(self.token_url)
+        self.assertEqual(405, response.status_code)
 
         self.assertEqual(
-            {'error': 'invalid_request',
-             'error_description': "Missing 'grant_type'"},
-            browser.json)
+            {"error": "invalid_request", "error_description": "POST only"},
+            response.json(),
+        )
 
-    @browsing
-    def test_rejects_unknown_grant_types(self, browser):
-        data = {'grant_type': 'unknown',
-                'assertion': self.valid_assertion}
+    def test_sets_cache_headers(self):
+        data = {"grant_type": JWT_BEARER_GRANT_TYPE, "assertion": self.valid_assertion}
+        response = requests.post(self.token_url, data=data)
+        self.assertIn("Pragma", response.headers)
+        self.assertEqual("no-cache", response.headers["Pragma"])
+        self.assertIn("Cache-Control", response.headers)
+        self.assertEqual("no-store", response.headers["Cache-Control"])
 
-        with browser.expect_http_error(code=400):
-            browser.open(view='@@oauth2-token', method='POST', data=data)
+    def test_sets_content_type_header(self):
+        data = {"grant_type": JWT_BEARER_GRANT_TYPE, "assertion": self.valid_assertion}
+        response = requests.post(self.token_url, data=data)
+        self.assertIn("Content-Type", response.headers)
+        self.assertEqual("application/json", response.headers["Content-Type"])
 
-        self.assertEqual(
-            {'error': 'invalid_request',
-             'error_description': "Only grant type '%s' is "
-                                  "supported" % JWT_BEARER_GRANT_TYPE},
-            browser.json)
-
-    @browsing
-    def test_rejects_missing_assertion(self, browser):
-        data = {'grant_type': JWT_BEARER_GRANT_TYPE}
-
-        with browser.expect_http_error(code=400):
-            browser.open(view='@@oauth2-token', method='POST', data=data)
+    def test_rejects_missing_grant_types(self):
+        data = {"assertion": self.valid_assertion}
+        response = requests.post(self.token_url, data=data)
+        self.assertEqual(400, response.status_code)
 
         self.assertEqual(
-            {'error': 'invalid_request',
-             'error_description': "Missing 'assertion'"},
-            browser.json)
+            {"error": "invalid_request", "error_description": "Missing 'grant_type'"},
+            response.json(),
+        )
 
-    @browsing
-    def test_rejects_unsupported_signature_algorithm(self, browser):
-        not_stored_keypair = create(Builder('keypair'))
-        private_key = not_stored_keypair[0]
+    def test_rejects_unknown_grant_types(self):
+        data = {"grant_type": "unknown", "assertion": self.valid_assertion}
+        response = requests.post(self.token_url, data=data)
+        self.assertEqual(400, response.status_code)
 
+        self.assertEqual(
+            {
+                "error": "invalid_request",
+                "error_description": "Only grant type '%s' is supported"
+                % JWT_BEARER_GRANT_TYPE,
+            },
+            response.json(),
+        )
+
+    def test_rejects_missing_assertion(self):
+        data = {"grant_type": JWT_BEARER_GRANT_TYPE}
+        response = requests.post(self.token_url, data=data)
+        self.assertEqual(400, response.status_code)
+
+        self.assertEqual(
+            {"error": "invalid_request", "error_description": "Missing 'assertion'"},
+            response.json(),
+        )
+
+    def test_rejects_unsupported_signature_algorithm(self):
         # Create (empty) JWT with unsupported signature algorithm
-        assertion = jwt.encode({}, private_key, algorithm='HS256')
+        assertion = jwt.encode({}, "some-key", algorithm="HS256")
 
-        data = {'grant_type': JWT_BEARER_GRANT_TYPE,
-                'assertion': assertion}
-
-        with browser.expect_http_error(code=400):
-            browser.open(view='@@oauth2-token', method='POST', data=data)
+        data = {"grant_type": JWT_BEARER_GRANT_TYPE, "assertion": assertion}
+        response = requests.post(self.token_url, data=data)
+        self.assertEqual(400, response.status_code)
 
         self.assertEqual(
-            {'error': 'invalid_request',
-             'error_description': 'Only RS256 signature algorithm '
-                                  'is supported'},
-            browser.json)
+            {
+                "error": "invalid_request",
+                "error_description": "Only RS256 signature algorithm is supported",
+            },
+            response.json(),
+        )
 
-    @browsing
-    def test_rejects_unknown_service_key(self, browser):
-        not_stored_keypair = create(Builder('keypair'))
-        assertion = create(Builder('jwt_grant')
-                           .from_keypair(not_stored_keypair))
-
-        data = {'grant_type': JWT_BEARER_GRANT_TYPE,
-                'assertion': assertion}
-
-        with browser.expect_http_error(code=400):
-            browser.open(view='@@oauth2-token', method='POST', data=data)
+    def test_rejects_unknown_service_key(self):
+        # not_stored_keypair = create(Builder("keypair"))
+        not_stored_keypair = build_key_pair()
+        # assertion = create(Builder("jwt_grant").from_keypair(not_stored_keypair))
+        assertion = build_jwt_grant(not_stored_keypair)
+        data = {"grant_type": JWT_BEARER_GRANT_TYPE, "assertion": assertion}
+        response = requests.post(self.token_url, data=data)
+        self.assertEqual(400, response.status_code)
 
         self.assertEqual(
-            {'error': 'invalid_grant',
-             'error_description': 'No associated key found'},
-            browser.json)
+            {"error": "invalid_grant", "error_description": "No associated key found"},
+            response.json(),
+        )
 
-    @browsing
-    def test_rejects_invalid_jwt_assertion(self, browser):
+    def test_rejects_invalid_jwt_assertion(self):
         # In-depth tests for JWT grant validation are tested in
         # collective.ftw.tokenauth.tests.test_jwt_grant_validation.py
-        invalid_assertion = create(Builder('jwt_grant')
-                                   .having(aud='http://bogus.example.org')
-                                   .from_keypair(self.keypair))
+        # invalid_assertion = create(
+        #     Builder("jwt_grant")
+        #     .having(aud="http://bogus.example.org")
+        #     .from_keypair(self.keypair)
+        # )
+        invalid_assertion = build_jwt_grant(
+            self.keypair, {"aud": "http://bogus.example.org"}
+        )
 
-        data = {'grant_type': JWT_BEARER_GRANT_TYPE,
-                'assertion': invalid_assertion}
-
-        with browser.expect_http_error(code=400):
-            browser.open(view='@@oauth2-token', method='POST', data=data)
-
-        self.assertEqual(
-            {'error': 'invalid_grant',
-             'error_description': 'Invalid audience'},
-            browser.json)
-
-    @browsing
-    def test_issues_access_token_for_valid_grant(self, browser):
-        data = {'grant_type': JWT_BEARER_GRANT_TYPE,
-                'assertion': self.valid_assertion}
-
-        browser.open(view='@@oauth2-token', method='POST', data=data)
+        data = {"grant_type": JWT_BEARER_GRANT_TYPE, "assertion": invalid_assertion}
+        response = requests.post(self.token_url, data=data)
+        self.assertEqual(400, response.status_code)
 
         self.assertEqual(
-            ['access_token', 'token_type', 'expires_in'],
-            browser.json.keys())
-        self.assertDictContainsSubset(
-            {'token_type': 'Bearer',
-             'expires_in': 3600},
-            browser.json)
+            {"error": "invalid_grant", "error_description": "Audience doesn't match"},
+            response.json(),
+        )
+
+    def test_issues_access_token_for_valid_grant(self):
+        data = {"grant_type": JWT_BEARER_GRANT_TYPE, "assertion": self.valid_assertion}
+        response = requests.post(self.token_url, data=data)
+        transaction.commit()
+
+        self.assertEqual(200, response.status_code)
+        response_json = response.json()
+
+        self.assertCountEqual(
+            ["access_token", "token_type", "expires_in"], list(response_json.keys())
+        )
+        self.assertEqual("Bearer", response_json["token_type"])
+        self.assertEqual(3600, response_json["expires_in"])
 
         # Make sure the token we got is valid and can be used to authenticate
-        token = browser.json['access_token']
-        creds = {'access_token': token, 'extractor': 'token_auth'}
+        token = response_json["access_token"]
+        creds = {"access_token": token, "extractor": self.plugin.getId()}
         self.assertEqual(
             (TEST_USER_ID, TEST_USER_NAME),
-            self.plugin.authenticateCredentials(creds))
+            self.plugin.authenticateCredentials(creds),
+        )
 
-    @browsing
-    def test_respects_custom_access_token_lifetime(self, browser):
+    def test_respects_custom_access_token_lifetime(self):
         self.plugin.access_token_lifetime = 7200
         transaction.commit()
 
-        data = {'grant_type': JWT_BEARER_GRANT_TYPE,
-                'assertion': self.valid_assertion}
+        data = {"grant_type": JWT_BEARER_GRANT_TYPE, "assertion": self.valid_assertion}
+        response = requests.post(self.token_url, data=data)
+        self.assertEqual(200, response.status_code)
+        self.assertEqual(7200, response.json()["expires_in"])
 
-        browser.open(view='@@oauth2-token', method='POST', data=data)
-        self.assertDictContainsSubset({'expires_in': 7200}, browser.json)
-
-    @browsing
-    def test_issues_impersonated_access_token(self, browser):
+    def test_issues_impersonated_access_token(self):
         self.portal.manage_permission(
-            'collective.ftw.tokenauth: Impersonate user', ['Member'], acquire=False)
-        api.user.create(email='jane@plone.org', username='jane')
-        assertion = create(Builder('jwt_grant').from_keypair(
-            self.keypair).for_subject('jane'))
+            "collective.ftw.tokenauth: Impersonate user", ["Member"], acquire=False
+        )
+        api.user.create(email="jane@plone.org", username="jane")
+        # assertion = create(
+        #     Builder("jwt_grant").from_keypair(self.keypair).for_subject("jane")
+        # )
+        assertion = build_jwt_grant(self.keypair, {"sub": "jane"})
         transaction.commit()
 
-        data = {'grant_type': JWT_BEARER_GRANT_TYPE,
-                'assertion': assertion}
+        data = {"grant_type": JWT_BEARER_GRANT_TYPE, "assertion": assertion}
+        response = requests.post(self.token_url, data=data)
+        transaction.commit()
 
-        browser.open(view='@@oauth2-token', method='POST', data=data)
-
-        self.assertEqual(
-            ['access_token', 'token_type', 'expires_in'],
-            browser.json.keys())
-        self.assertDictContainsSubset(
-            {'token_type': 'Bearer',
-             'expires_in': 3600},
-            browser.json)
+        self.assertEqual(200, response.status_code)
+        response_json = response.json()
+        self.assertCountEqual(
+            ["access_token", "token_type", "expires_in"], list(response_json.keys())
+        )
+        self.assertEqual("Bearer", response_json["token_type"])
+        self.assertEqual(3600, response_json["expires_in"])
 
         # Make sure the token we got is valid and can be used to authenticate
-        token = browser.json['access_token']
-        creds = {'access_token': token, 'extractor': 'token_auth'}
-        self.assertEqual(
-            ('jane', 'jane'),
-            self.plugin.authenticateCredentials(creds))
+        token = response_json["access_token"]
+        creds = {"access_token": token, "extractor": self.plugin.getId()}
+        self.assertEqual(("jane", "jane"), self.plugin.authenticateCredentials(creds))
 
-    @browsing
-    def test_rejects_impersonated_access_token_without_permission_(
-            self, browser):
-        api.user.create(email='jane@plone.org', username='jane')
-        assertion = create(Builder('jwt_grant').from_keypair(
-            self.keypair).for_subject('jane'))
+    def test_rejects_impersonated_access_token_without_permission(self):
+        api.user.create(email="jane@plone.org", username="jane")
+        # assertion = create(
+        #     Builder("jwt_grant").from_keypair(self.keypair).for_subject("jane")
+        # )
+        assertion = build_jwt_grant(self.keypair, {"sub": "jane"})
         transaction.commit()
 
-        data = {'grant_type': JWT_BEARER_GRANT_TYPE,
-                'assertion': assertion}
-
-        with browser.expect_http_error(code=400):
-            browser.open(view='@@oauth2-token', method='POST', data=data)
+        data = {"grant_type": JWT_BEARER_GRANT_TYPE, "assertion": assertion}
+        response = requests.post(self.token_url, data=data)
+        self.assertEqual(400, response.status_code)
 
         self.assertEqual(
-            {'error': 'invalid_grant',
-             'error_description':
-                "JWT subject doesn't match user_id of service key."},
-            browser.json)
+            {
+                "error": "invalid_grant",
+                "error_description": "JWT subject doesn't match user_id of service key.",
+            },
+            response.json(),
+        )
 
-    @browsing
-    def test_rejects_impersonated_access_token_without_service_user_(
-            self, browser):
-        keypair = self.plugin.issue_keypair(SITE_OWNER_NAME, 'A Service Key')
-        assertion = create(Builder('jwt_grant').from_keypair(
-            keypair).for_subject('jane'))
+    def test_rejects_impersonated_access_token_without_service_user(self):
+        keypair = self.plugin.issue_keypair(SITE_OWNER_NAME, "A Service Key")
+        # assertion = create(
+        #     Builder("jwt_grant").from_keypair(keypair).for_subject("jane")
+        # )
+        assertion = build_jwt_grant(keypair, {"sub": "jane"})
         transaction.commit()
 
-        data = {'grant_type': JWT_BEARER_GRANT_TYPE,
-                'assertion': assertion}
-
-        with browser.expect_http_error(code=400):
-            browser.open(view='@@oauth2-token', method='POST', data=data)
+        data = {"grant_type": JWT_BEARER_GRANT_TYPE, "assertion": assertion}
+        response = requests.post(self.token_url, data=data)
+        self.assertEqual(400, response.status_code)
 
         self.assertEqual(
-            {'error': 'invalid_grant',
-             'error_description':
-                "Service key user not found."},
-            browser.json)
+            {
+                "error": "invalid_grant",
+                "error_description": "Service key user not found.",
+            },
+            response.json(),
+        )

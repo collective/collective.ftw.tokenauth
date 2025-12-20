@@ -1,11 +1,12 @@
-from collective.ftw.builder import Builder
-from collective.ftw.builder import builder_registry
-from collective.ftw.builder import create
 from collective.ftw.tokenauth.pas.storage import CredentialStorage
 from collective.ftw.tokenauth.service_keys.key_generation import create_service_key_pair
 from collective.ftw.tokenauth.testing.layers import DEFAULT_TESTING_TOKEN_URI
+from ftw.builder import Builder
+from ftw.builder import builder_registry
+from ftw.builder import create
 from plone.app.testing import TEST_USER_ID
 from zope.component.hooks import getSite
+
 import jwt
 import time
 
@@ -20,10 +21,10 @@ class ServiceKeyBuilder(object):
     def __init__(self, session):
         self.session = session
         self.portal = getSite()
-        self.plugin = self.portal.acl_users['token_auth']
+        self.plugin = self.portal.acl_users["token_auth"]
         self.arguments = {
-            'user_id': TEST_USER_ID,
-            'title': 'Key Title',
+            "user_id": TEST_USER_ID,
+            "title": "Key Title",
         }
 
     def having(self, **kwargs):
@@ -32,13 +33,15 @@ class ServiceKeyBuilder(object):
 
     def create(self, **kwargs):
         private_key, service_key = self.plugin.issue_keypair(
-            self.arguments.get('user_id'),
-            self.arguments.get('title'),
-            self.arguments.get('ip_range'))
+            self.arguments.get("user_id"),
+            self.arguments.get("title"),
+            self.arguments.get("ip_range"),
+        )
 
         return service_key
 
-builder_registry.register('service_key', ServiceKeyBuilder)
+
+builder_registry.register("service_key", ServiceKeyBuilder)
 
 
 class KeyPairBuilder(object):
@@ -55,10 +58,10 @@ class KeyPairBuilder(object):
     def __init__(self, session):
         self.session = session
         self.arguments = {
-            'user_id': 'default-user-id',
-            'client_id': 'default-client-id',
-            'title': 'Test Key',
-            'token_uri': DEFAULT_TESTING_TOKEN_URI,
+            "user_id": "default-user-id",
+            "client_id": "default-client-id",
+            "title": "Test Key",
+            "token_uri": DEFAULT_TESTING_TOKEN_URI,
         }
 
     def having(self, **kwargs):
@@ -67,17 +70,18 @@ class KeyPairBuilder(object):
 
     def create(self, **kwargs):
         private_key, service_key = create_service_key_pair(
-            self.arguments.get('user_id'),
-            self.arguments.get('title'),
-            self.arguments.get('token_uri'),
-            self.arguments.get('ip_range'),
+            self.arguments.get("user_id"),
+            self.arguments.get("title"),
+            self.arguments.get("token_uri"),
+            self.arguments.get("ip_range"),
         )
         # Override the randomly created client_id
-        service_key['client_id'] = self.arguments.get('client_id')
+        service_key["client_id"] = self.arguments.get("client_id")
 
         return private_key, service_key
 
-builder_registry.register('keypair', KeyPairBuilder)
+
+builder_registry.register("keypair", KeyPairBuilder)
 
 
 class JWTGrantBuilder(object):
@@ -113,52 +117,56 @@ class JWTGrantBuilder(object):
         return self
 
     def for_subject(self, subject):
-        self.arguments['sub'] = subject
+        self.arguments["sub"] = subject
         return self
 
     def create(self, **kwargs):
         if not self.keypair:
             raise Exception(
-                'This builder requires a (private_key, service_key) key pair '
-                'to be passed in  - use .from_keypair()')
+                "This builder requires a (private_key, service_key) key pair "
+                "to be passed in  - use .from_keypair()"
+            )
         private_key, service_key = self.keypair
 
         # Determine defaults for required claims
-        aud = self.arguments.get('aud', service_key['token_uri'])
-        iss = self.arguments.get('iss', service_key['client_id'])
-        sub = self.arguments.get('sub', service_key['user_id'],)
-        iat = self.arguments.get('iat', int(time.time()))
-        exp = self.arguments.get('exp', int(time.time()) + (60 * 60))
+        aud = self.arguments.get("aud", service_key["token_uri"])
+        iss = self.arguments.get("iss", service_key["client_id"])
+        sub = self.arguments.get(
+            "sub",
+            service_key["user_id"],
+        )
+        iat = self.arguments.get("iat", int(time.time()))
+        exp = self.arguments.get("exp", int(time.time()) + (60 * 60))
 
         claim_set = {
-            'aud': aud,
-            'iss': iss,
-            'sub': sub,
-            'iat': iat,
-            'exp': exp,
+            "aud": aud,
+            "iss": iss,
+            "sub": sub,
+            "iat": iat,
+            "exp": exp,
         }
 
         # nbf and scope claims are not supported. So they're not included in
         # the claimset by default unless specifically requested
 
-        nbf = self.arguments.get('nbf')
+        nbf = self.arguments.get("nbf")
         if nbf:
-            claim_set['nbf'] = nbf
+            claim_set["nbf"] = nbf
 
-        scope = self.arguments.get('scope')
+        scope = self.arguments.get("scope")
         if scope:
-            claim_set['scope'] = scope
+            claim_set["scope"] = scope
 
         # Drop any claims that have been requested to be omitted
         if self.without_claims:
             for claim in self.without_claims:
                 claim_set.pop(claim)
 
-        grant_token = jwt.encode(claim_set, private_key, algorithm='RS256')
+        grant_token = jwt.encode(claim_set, private_key, algorithm="RS256")
         return grant_token
 
 
-builder_registry.register('jwt_grant', JWTGrantBuilder)
+builder_registry.register("jwt_grant", JWTGrantBuilder)
 
 
 class AccessTokenBuilder(object):
@@ -174,11 +182,11 @@ class AccessTokenBuilder(object):
     def __init__(self, session):
         self.session = session
         self.portal = getSite()
-        self.plugin = self.portal.acl_users['token_auth']
+        self.plugin = self.portal.acl_users["token_auth"]
         self.key_or_keybuilder = None
         self.issued_at = None
         self.arguments = {
-            'user_id': TEST_USER_ID,
+            "user_id": TEST_USER_ID,
         }
 
     def having(self, **kwargs):
@@ -193,7 +201,7 @@ class AccessTokenBuilder(object):
         """Shorthand to create a service_key for the given user_id, and tie
         the returned token to it.
         """
-        self.arguments['user_id'] = user_id
+        self.arguments["user_id"] = user_id
         return self
 
     def issued(self, issued_at):
@@ -206,8 +214,8 @@ class AccessTokenBuilder(object):
         if self.key_or_keybuilder is None:
             # No key or key builder provided, create one with defaults
             service_key = create(
-                Builder('service_key')
-                .having(user_id=self.arguments.get('user_id')))
+                Builder("service_key").having(user_id=self.arguments.get("user_id"))
+            )
         else:
             # A deferred builder got passed in, materialize it
             if isinstance(self.key_or_keybuilder, ServiceKeyBuilder):
@@ -220,14 +228,16 @@ class AccessTokenBuilder(object):
     def create(self, **kwargs):
         service_key = self.get_or_create_key()
         access_token = self.plugin.issue_access_token(
-            service_key['key_id'], service_key['user_id'])
+            service_key["key_id"], service_key["user_id"]
+        )
 
         if self.issued_at:
             # Set issue date of token in storage
             storage = CredentialStorage(self.plugin)
-            token_in_storage = storage.get_access_token(access_token['token'])
-            token_in_storage['issued'] = self.issued_at
+            token_in_storage = storage.get_access_token(access_token["token"])
+            token_in_storage["issued"] = self.issued_at
 
         return access_token
 
-builder_registry.register('access_token', AccessTokenBuilder)
+
+builder_registry.register("access_token", AccessTokenBuilder)

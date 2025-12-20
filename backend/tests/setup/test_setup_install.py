@@ -8,9 +8,9 @@ class TestSetupInstall:
 
     def test_browserlayer(self, browser_layers):
         """Test that IBrowserLayer is registered."""
-        from collective.ftw.tokenauth.interfaces import IBrowserLayer
+        from collective.ftw.tokenauth.interfaces import ICollectiveFTWTokenauthLayer
 
-        assert IBrowserLayer in browser_layers
+        assert ICollectiveFTWTokenauthLayer in browser_layers
 
     def test_latest_version(self, profile_last_version):
         """Test latest version of default profile."""
