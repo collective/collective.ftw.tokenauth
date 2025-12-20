@@ -1,0 +1,37 @@
+[repository]
+name = "tokenauth"
+managed_by_uv = false
+changelog = "CHANGELOG.md"
+version = "version.txt"
+compose = "docker-compose.yml"
+
+[repository.towncrier]
+section = "Project"
+settings = "towncrier.toml"
+
+[backend]
+path = "backend"
+
+[backend.package]
+name = "collective.ftw.tokenauth"
+path = "backend"
+changelog = "backend/CHANGELOG.md"
+towncrier_settings = "backend/pyproject.toml"
+base_package = "Products.CMFPlone"
+publish = false
+
+[frontend]
+path = "frontend"
+
+[frontend.package]
+name = "@plone-collective/volto-tokenauth"
+path = "frontend/packages/@plone-collective/volto-tokenauth"
+changelog = "frontend/packages/@plone-collective/volto-tokenauth/CHANGELOG.md"
+towncrier_settings = "frontend/packages/@plone-collective/volto-tokenauth/towncrier.toml"
+base_package = "@plone/volto"
+publish = false
+
+[cookieplone]
+template = "project"
+template_version = "96574af4136cae375cc74be36daed12df6ed6f82"
+generated_date = "2025-12-19 15:11:55"
