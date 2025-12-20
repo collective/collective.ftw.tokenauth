@@ -10,6 +10,10 @@ access tokens.
 
 This project is a fork of the original [ftw.tokenauth](https//github.com/4teamwork/ftw.tokenauth) package by 4teamwork, released under the GPLv2.
 
+## Documentation
+
+The documentation of this package can be found on [read-the-docs](https://collectiveftwtokenauth.readthedocs.io/en/)
+
 
 ## Project structure 🏗️
 
