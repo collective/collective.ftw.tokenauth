@@ -1,24 +1,25 @@
 # collective.ftw.tokenauth
 
-A new project using Plone 6.
+This project is a fork of the original [ftw.tokenauth](https://github.com/4teamwork/ftw.tokenauth) product.
 
-## Features
+It has been updated to support python3 and Plone 6.
 
-TODO: List our awesome features
+PAS plugin that facilitates **machine-to-machine authentication** by
+implementing a two legged OAuth2 flow using service keys and short-lived
+access tokens.
 
 ## Installation
 
-Install collective.ftw.tokenauth with uv.
+Add collective.ftw.tokenauth to your dependencies.
 
-```shell
-uv add collective.ftw.tokenauth
-```
+## Configuration
 
-Create the Plone site.
+For a user to be allowed to issue (or otherwise manage) service keys, they
+require the `ftw.tokenauth: Manage own Service Keys` permission. So
+integration packages need to assign this permission to roles that should be
+allowed to use service keys.
 
-```shell
-make create-site
-```
+By default all users with the "Member" role get this permission.
 
 ## Contribute
 
@@ -27,11 +28,11 @@ make create-site
 
 ### Prerequisites ✅
 
--   An [operating system](https://6.docs.plone.org/install/create-project-cookieplone.html#prerequisites-for-installation) that runs all the requirements mentioned.
--   [uv](https://6.docs.plone.org/install/create-project-cookieplone.html#uv)
--   [Make](https://6.docs.plone.org/install/create-project-cookieplone.html#make)
--   [Git](https://6.docs.plone.org/install/create-project-cookieplone.html#git)
--   [Docker](https://docs.docker.com/get-started/get-docker/) (optional)
+- An [operating system](https://6.docs.plone.org/install/create-project-cookieplone.html#prerequisites-for-installation) that runs all the requirements mentioned.
+- [uv](https://6.docs.plone.org/install/create-project-cookieplone.html#uv)
+- [Make](https://6.docs.plone.org/install/create-project-cookieplone.html#make)
+- [Git](https://6.docs.plone.org/install/create-project-cookieplone.html#git)
+- [Docker](https://docs.docker.com/get-started/get-docker/) (optional)
 
 ### Installation 🔧
 
@@ -47,7 +48,6 @@ make create-site
     ```shell
     make install
     ```
-
 
 ### Add features using `plonecli` or `bobtemplates.plone`
 
@@ -84,4 +84,4 @@ The project is licensed under GPLv2.
 
 ## Credits and acknowledgements 🙏
 
-Generated from the [`cookieplone-templates`  template](https://github.com/plone/cookieplone-templates/tree/main/) on 2025-12-19 15:11:56.. A special thanks to all contributors and supporters!
+Generated from the [`cookieplone-templates` template](https://github.com/plone/cookieplone-templates/tree/main/) on 2025-12-19 15:11:56.. A special thanks to all contributors and supporters!

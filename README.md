@@ -4,84 +4,20 @@
 [![Black code style](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![CI](https://github.com/collective/tokenauth/actions/workflows/main.yml/badge.svg)](https://github.com/collective/tokenauth/actions/workflows/main.yml)
 
-A new project using Plone 6.
+PAS plugin that facilitates **machine-to-machine authentication** by
+implementing a two legged OAuth2 flow using service keys and short-lived
+access tokens.
 
-## Quick Start 🏁
+This project is a fork of the original [ftw.tokenauth](https//github.com/4teamwork/ftw.tokenauth) package by 4teamwork, released under the GPLv2.
 
-### Prerequisites ✅
-
--   An [operating system](https://6.docs.plone.org/install/create-project-cookieplone.html#prerequisites-for-installation) that runs all the requirements mentioned.
--   [uv](https://6.docs.plone.org/install/create-project-cookieplone.html#uv)
--   [nvm](https://6.docs.plone.org/install/create-project-cookieplone.html#nvm)
--   [Node.js and pnpm](https://6.docs.plone.org/install/create-project.html#node-js) 22
--   [Make](https://6.docs.plone.org/install/create-project-cookieplone.html#make)
--   [Git](https://6.docs.plone.org/install/create-project-cookieplone.html#git)
--   [Docker](https://docs.docker.com/get-started/get-docker/) (optional)
-
-
-### Installation 🔧
-
-1.  Clone this repository, then change your working directory.
-
-    ```shell
-    git clone git@github.com:collective/tokenauth.git
-    cd tokenauth
-    ```
-
-2.  Install this code base.
-
-    ```shell
-    make install
-    ```
-
-
-### Fire Up the Servers 🔥
-
-1.  Create a new Plone site on your first run.
-
-    ```shell
-    make backend-create-site
-    ```
-
-2.  Start the backend at http://localhost:8080/.
-
-    ```shell
-    make backend-start
-    ```
-
-3.  In a new shell session, start the frontend at http://localhost:3000/.
-
-    ```shell
-    make frontend-start
-    ```
-
-Voila! Your Plone site should be live and kicking! 🎉
-
-### Local Stack Deployment 📦
-
-Deploy a local Docker Compose environment that includes the following.
-
-- Docker images for Backend and Frontend 🖼️
-- A stack with a Traefik router and a PostgreSQL database 🗃️
-- Accessible at [http://tokenauth.localhost](http://tokenauth.localhost) 🌐
-
-Run the following commands in a shell session.
-
-```shell
-make stack-create-site
-make stack-start
-```
-
-And... you're all set! Your Plone site is up and running locally! 🚀
 
 ## Project structure 🏗️
 
 This monorepo consists of the following distinct sections:
 
-- **backend**: Houses the API and Plone installation, utilizing pip instead of buildout, and includes a policy package named collective.ftw.tokenauth.
-- **frontend**: Contains the React (Volto) package.
-- **devops**: Encompasses Docker stack, Ansible playbooks, and cache settings.
-- **docs**: Scaffold for writing documentation for your project.
+- **backend**: Houses the Plone backend add-on in package named collective.ftw.tokenauth.
+- **frontend**: Contains the React (Volto) package named volto-tokenauth
+- **docs**: Documentation
 
 ### Why this structure? 🤔
 
@@ -144,5 +80,7 @@ make i18n
 ```
 
 ## Credits and acknowledgements 🙏
+
+4teamwork for the original code of [ftw.tokenauth](https://github.com/4teamwork/ftw.tokenauth)
 
 Generated using [Cookieplone (0.9.10)](https://github.com/plone/cookieplone) and [cookieplone-templates (96574af)](https://github.com/plone/cookieplone-templates/commit/96574af4136cae375cc74be36daed12df6ed6f82) on 2025-12-19 16:10:59.558520. A special thanks to all contributors and supporters!

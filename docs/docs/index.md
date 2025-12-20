@@ -10,29 +10,29 @@ myst:
 # tokenauth
 
 Welcome to the documentation for tokenauth!
-A new project using Plone 6.
 
-This scaffold provides a ready-to-use environment for creating comprehensive documentation for {term}`Plone` projects, based on {term}`Plone Sphinx Theme`.
+This project adds a PAS plugin that facilitates **machine-to-machine authentication** by
+implementing a two legged OAuth2 flow using service keys and short-lived
+access tokens.
 
-Built with Markedly Structured Text ({term}`MyST`), this environment supports rich formatting, directives, and extensions tailored for technical documentation.
-
-It's structured following the [Diátaxis](https://diataxis.fr/) documentation framework.
+This documentation it's structured following the [Diátaxis](https://diataxis.fr/) documentation framework.
 
 ```{toctree}
-:caption: How to guides
+:caption: Authentication flow explanation
+:maxdepth: 2
+:hidden: true
+
+reference/index
+```
+
+```{toctree}
+:caption: Usage: how to authenticate
 :maxdepth: 2
 :hidden: true
 
 how-to-guides/index
 ```
 
-```{toctree}
-:caption: Reference
-:maxdepth: 2
-:hidden: true
-
-reference/index
-```
 
 ```{toctree}
 :caption: Tutorials
