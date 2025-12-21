@@ -62,9 +62,9 @@ class TestManageServiceKeysView(FunctionalTestCase):
         self.browser.getLink("Issue new service key").click()
         with freeze_time(datetime(2018, 1, 1, 15, 30)):
             self.browser.getControl(name="form.widgets.title").value = "My new key"
-            self.browser.getControl(
-                name="form.widgets.ip_range"
-            ).value = "192.168.0.0/16"
+            self.browser.getControl(name="form.widgets.ip_range").value = (
+                "192.168.0.0/16"
+            )
             self.browser.getControl(name="form.buttons.save").click()
 
         soup = BeautifulSoup(self.browser.contents, "html.parser")
@@ -127,9 +127,9 @@ class TestManageServiceKeysView(FunctionalTestCase):
         self.browser.open(f"{self.portal_url}/@@manage-service-keys")
         self.browser.getLink("Issue new service key").click()
 
-        self.browser.getControl(
-            name="form.widgets.title"
-        ).value = "Key without IP range"
+        self.browser.getControl(name="form.widgets.title").value = (
+            "Key without IP range"
+        )
         self.browser.getControl(name="form.buttons.save").click()
 
         storage = CredentialStorage(self.plugin)
@@ -157,9 +157,9 @@ class TestManageServiceKeysView(FunctionalTestCase):
         self.browser.open(f"{self.portal_url}/@@manage-service-keys")
         self.browser.getLink("Issue new service key").click()
 
-        self.browser.getControl(
-            name="form.widgets.title"
-        ).value = "Key with invalid IP range"
+        self.browser.getControl(name="form.widgets.title").value = (
+            "Key with invalid IP range"
+        )
         self.browser.getControl(name="form.widgets.ip_range").value = "192.168.5.5/16"
         self.browser.getControl(name="form.buttons.save").click()
 
@@ -230,7 +230,7 @@ class TestManageServiceKeysView(FunctionalTestCase):
                 "Key 1",
                 client_ids[0],
                 "",
-                "Jan 01, 2017 03:30",
+                "Jan 01, 2017 03:30 PM",
                 "",
                 "Edit",
             ],
@@ -242,7 +242,7 @@ class TestManageServiceKeysView(FunctionalTestCase):
                 "Key 2",
                 client_ids[1],
                 "192.168.0.0/16",
-                "May 05, 2018 12:45",
+                "May 05, 2018 12:45 PM",
                 "",
                 "Edit",
             ],
@@ -482,7 +482,7 @@ class TestUsageLogsView(FunctionalTestCase):
 
         key_values = soup.css.select("#table-service-keys tbody tr td")
         self.assertEqual(
-            "Jan 05, 2018 12:45", key_values[5].get_text().strip()
+            "Jan 05, 2018 12:45 PM", key_values[5].get_text().strip()
         )  # Last used
 
         logs_link_url = key_values[5].select("a")[0].get("href")
@@ -497,7 +497,7 @@ class TestUsageLogsView(FunctionalTestCase):
 
         self.assertEqual(
             [
-                "Jan 05, 2018 12:45",
+                "Jan 05, 2018 12:45 PM",
                 "test_user_1_",
                 "10.0.0.77",
                 "some-client/1.23.4",
@@ -506,7 +506,7 @@ class TestUsageLogsView(FunctionalTestCase):
         )
         self.assertEqual(
             [
-                "Jan 01, 2018 03:30",
+                "Jan 01, 2018 03:30 PM",
                 "test_user_1_",
                 "10.0.0.77",
                 "some-client/1.23.4",
