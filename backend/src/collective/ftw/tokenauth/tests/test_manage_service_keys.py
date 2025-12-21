@@ -62,9 +62,9 @@ class TestManageServiceKeysView(FunctionalTestCase):
         self.browser.getLink("Issue new service key").click()
         with freeze_time(datetime(2018, 1, 1, 15, 30)):
             self.browser.getControl(name="form.widgets.title").value = "My new key"
-            self.browser.getControl(name="form.widgets.ip_range").value = (
-                "192.168.0.0/16"
-            )
+            self.browser.getControl(
+                name="form.widgets.ip_range"
+            ).value = "192.168.0.0/16"
             self.browser.getControl(name="form.buttons.save").click()
 
         soup = BeautifulSoup(self.browser.contents, "html.parser")
@@ -127,9 +127,9 @@ class TestManageServiceKeysView(FunctionalTestCase):
         self.browser.open(f"{self.portal_url}/@@manage-service-keys")
         self.browser.getLink("Issue new service key").click()
 
-        self.browser.getControl(name="form.widgets.title").value = (
-            "Key without IP range"
-        )
+        self.browser.getControl(
+            name="form.widgets.title"
+        ).value = "Key without IP range"
         self.browser.getControl(name="form.buttons.save").click()
 
         storage = CredentialStorage(self.plugin)
@@ -157,9 +157,9 @@ class TestManageServiceKeysView(FunctionalTestCase):
         self.browser.open(f"{self.portal_url}/@@manage-service-keys")
         self.browser.getLink("Issue new service key").click()
 
-        self.browser.getControl(name="form.widgets.title").value = (
-            "Key with invalid IP range"
-        )
+        self.browser.getControl(
+            name="form.widgets.title"
+        ).value = "Key with invalid IP range"
         self.browser.getControl(name="form.widgets.ip_range").value = "192.168.5.5/16"
         self.browser.getControl(name="form.buttons.save").click()
 
