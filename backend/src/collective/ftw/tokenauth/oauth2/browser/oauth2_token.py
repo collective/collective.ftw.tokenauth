@@ -202,7 +202,7 @@ class OAuth2TokenEndpoint(BrowserView):
 
         if requested_grant_type != JWT_BEARER_GRANT_TYPE:
             raise InvalidRequest(
-                f"Only grant type {JWT_BEARER_GRANT_TYPE} is supported"
+                f"Only grant type '{JWT_BEARER_GRANT_TYPE}' is supported"
             )
 
     def require_assertion(self):
